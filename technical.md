@@ -162,7 +162,7 @@ While it’s been a recent development for Chrome to change the heuristics regar
 The following code goes in the head of an HTML document and it provides basic support across platforms:
 
 ```html
-<!— Place favicon.ico in the app/ directory -->
+<!—- Place favicon.ico in the app/ directory -->
 <link rel="icon" type="image/png" href="app/icon.png">
 
 <!-- Chrome for Android theme color -->
