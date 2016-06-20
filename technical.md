@@ -69,73 +69,75 @@ First we’ll build the code for the Service Worker. This is a simple Service Wo
 * Load and cache the shell for the application 
 * Cache any requests for content of our application before displaying it to the user
 
-	'use strict';
-	 // Chrome's currently missing some useful cache methods,
-	 // this polyfill adds them.
-	 importScripts('serviceworker-cache-polyfill.js');
+```javascript
+'use strict';
+// Chrome's currently missing some useful cache methods,
+// this polyfill adds them.
+importScripts('serviceworker-cache-polyfill.js');
+
+// Define constants for cache names and versions
+const SHELL_CACHE = 'shell_cache';
+const SHELL_VERSION = 1;
+const CONTENT_CACHE = 'content_cache';
+const CONTENT_VERSION = 1;
+
+// Content to  cache when the ServiceWorker is installed
+// Change to match the files you need for your app shell.
+const SHELL_CONTENT = [
+	'/path/to/javascript.js',
+	'/path/to/stylesheet.css',
+	'/path/to/someimage.png',
+	'/path/to/someotherimage.png',
+	'/',
+	'/offline.html'
+];
 	
-	 // Define constants for cache names and versions
-	 const SHELL_CACHE = 'shell_cache';
-	 const SHELL_VERSION = 1;
-	 const CONTENT_CACHE = 'content_cache';
-	 const CONTENT_VERSION = 1;
+// 1. Register Service Worker
+if ('serviceWorker' in navigator) {
+	navigator.serviceWorker.register('sw.js');
+	// It worked, SW registered
+	console.log('ServiceWorker successfully registered');
+} else {
+	// something happened, SW didn't register
+	console.log('ServiceWorker Barfed, did not register: ' + error);
+}
 	
-	// Content to  cache when the ServiceWorker is installed
-	// Change to match the files you need for your app shell.
-	 const SHELL_CONTENT = [
-	   '/path/to/javascript.js',
-	   '/path/to/stylesheet.css',
-	   '/path/to/someimage.png',
-	   '/path/to/someotherimage.png',
-	   '/',
-	   '/offline.html'
-	 ];
+// 2. Install the Service Worker and cache the shell content.
+self.addEventListener('install',  (event) => {
+	event.waitUntil(
+		caches.open(SHELL_CACHE + ' - v' + SHELL_VERSION)
+			.then( (cache) => {
+				return cache.addAll(SHELL_CONTENT);
+	    })
+	    .then(() => {
+	    	return self.skipWaiting();
+	    })
+  );
+});
 	
-	  // 1. Register Service Worker
-	  if ('serviceWorker' in navigator) {
-	    navigator.serviceWorker.register('sw.js');
-	    // It worked, SW registered
-	    console.log('ServiceWorker successfully registered');
-	  } else {
-	    // something happened, SW didn't register
-	    console.log('ServiceWorker Barfed, did not register: ' + error);
-	  }
+// 3. Activate event
+self.addEventListener('activate', function(event) {
+	// FIXME: Write cache cleaning logic
+	return self.clients.claim();
+});
 	
-	  // 2. Install the Service Worker and cache the shell content.
-	  self.addEventListener('install',  (event) => {
-	    event.waitUntil(
-	      caches.open(SHELL_CACHE + ' - v' + SHELL_VERSION)
-	        .then( (cache) => {
-	          return cache.addAll(SHELL_CONTENT);
-	      })
-	        .then(() => {
-	            return self.skipWaiting();
-	        })
-	      );
-	  });
-	
-	  // 3. Activate event
-	  self.addEventListener('activate', function(event) {
-	    // FIXME: Write cache cleaning logic
-	    return self.clients.claim();
-	  });
-	
-	  // 4. Fetch resources
-	  self.addEventListener('fetch', function (event) {
-	    let request = event.request;
-	    event.respondWith(
-	      caches.match(request).then(() => {
-	        return fetch(request)
-	          .then((response) => {
-	            return caches.open(CONTENT_CACHE + '-v' + CONTENT_VERSION)
-	              .then((cache) => {
-	                cache.put(event.request, response.clone());
-	                return response;
-	              });
-	          })
-	      })
-	    ); // closes response
-	});// closes the fetch event listener
+// 4. Fetch resources
+self.addEventListener('fetch', function (event) {
+	let request = event.request;
+	event.respondWith(
+		caches.match(request).then(() => {
+			return fetch(request)
+			.then((response) => {
+				return caches.open(CONTENT_CACHE + '-v' + CONTENT_VERSION)
+			.then((cache) => {
+				cache.put(event.request, response.clone());
+					return response;
+				});
+			})
+		})
+	); // closes response
+});// closes the fetch event listener
+```
 
 With this Service Worker we provide a consistent response regardless of the network (or lack thereof.) Think about it when you add a native application: the load time is very slow the first time but perfromance remains constant in subsequent visits; we no longer need to rely exclusively on the network for our applications. 
 
@@ -159,50 +161,53 @@ While it’s been a recent development for Chrome to change the heuristics regar
 
 The following code goes in the head of an HTML document and it provides basic support across platforms:
 
-		  <!— Place favicon.ico in the app/ directory -->
-	 <link rel="icon" type="image/png" href="app/icon.png">
+```html
+<!— Place favicon.ico in the app/ directory -->
+<link rel="icon" type="image/png" href="app/icon.png">
 
-	  <!-- Chrome for Android theme color -->
-	  <meta name="theme-color" content="#2E3AA1">
+<!-- Chrome for Android theme color -->
+<meta name="theme-color" content="#2E3AA1">
 
-	  <!-- Web Application Manifest -->
-	  <link rel="manifest" href="manifest.json">
+<!-- Web Application Manifest -->
+<link rel="manifest" href="manifest.json">
 
-	  <!-- Tile color for Win8 -->
-	  <meta name="msapplication-TileColor" content="#3372DF">
+<!-- Tile color for Win8 -->
+<meta name="msapplication-TileColor" content="#3372DF">
 
-	  <!-- Add to homescreen for Chrome on Android -->
-	  <meta name="mobile-web-app-capable" content="yes">
-	  <meta name="application-name" content="YOUR NAME HERE">
-	  <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+<!-- Add to homescreen for Chrome on Android -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="YOUR NAME HERE">
+<link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
 
-	  <!-- Add to homescreen for Safari on iOS -->
-	  <meta name="apple-mobile-web-app-capable" content="yes">
-	  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-	  <meta name="apple-mobile-web-app-title" content="YOUR NAME HERE">
-	  <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+<!-- Add to homescreen for Safari on iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="YOUR NAME HERE">
+<link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
 
-	  <!-- Tile icon for Win8 (144x144) -->
-	  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
-
+<!-- Tile icon for Win8 (144x144) -->
+<meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+```
 To activate newer features in Chrome we have to create a  `manifest.json` file and explore what it does.  We’ll shorten the file by removing some of the icon links
 
-	{
-	  "name": "Book Reader",
-	  "short_name": "Book Reader",
-	  "icons": [{
-	        "src": "images/touch/icon-72x72.png",
-	        "sizes": "72x72",
-	        "type": "image/png"
-	      }, {
-	        "src": "images/touch/icon-96x96.png",
-	        "sizes": "96x96",
-	        "type": "image/png"
-	      }],
-	  "background_color": "#3E4EB8",
-	  "display": "standalone",
-	  "theme_color": "#2E3AA1"
-	}
+```javascript
+{
+	"name": "Book Reader",
+	"short_name": "Book Reader",
+	"icons": [{
+		"src": "images/touch/icon-72x72.png",
+		"sizes": "72x72",
+		"type": "image/png"
+	}, {
+		"src": "images/touch/icon-96x96.png",
+	  "sizes": "96x96",
+	  "type": "image/png"
+	}],
+	"background_color": "#3E4EB8",
+	"display": "standalone",
+	"theme_color": "#2E3AA1"
+}
+```
 
 We also have icons for multiple resolutions  to acommodate for different resolutions. If you’re not interested in supporting all the resolutions (and I personally wouldn’t) you can skip the resolutions you are not working with. 
 
@@ -219,33 +224,36 @@ In addition to these tools there are a couple libraries from Google that I want 
 
 You use sw-precache with your build system, Gulp in my case, to generate a list of the files to precache.  This is much better than doing it manually… you only have one place to update and the build script will take care of the tedious process.  One way to precache only some files for your project looks like this:
 
-	// This would most likely be defined elsewhere
-	const rootDir = myApp;
+```javascript
+// This would most likely be defined elsewhere
+const rootDir = myApp;
 	
-	const filesToCache =  [
-	  rootDir + '/bower_components/**/*.{html,js,css}',
-	  rootDir + '/elements/**',
-	  rootDir + '/fonts/**',
-	  rootDir + '/images/**',
-	  rootDir + '/scripts/**',
-	  rootDir + '/styles/**/*.css',
-	  rootDir + '/manifest.json',
-	  rootDir + '/humans.txt',
-	  rootDir + '/favicon.ico',
-	  rootDir + '/data-worker-scripts.js'
-	];
-	
-	// part of the sw-precache library
-	swPrecache(filesToCache, callback);
+const filesToCache =  [
+	rootDir + '/bower_components/**/*.{html,js,css}',
+	rootDir + '/elements/**',
+	rootDir + '/fonts/**',
+	rootDir + '/images/**',
+	rootDir + '/scripts/**',
+	rootDir + '/styles/**/*.css',
+	rootDir + '/manifest.json',
+	rootDir + '/humans.txt',
+	rootDir + '/favicon.ico',
+	rootDir + '/data-worker-scripts.js'
+];
+
+// part of the sw-precache library
+swPrecache(filesToCache, callback);
+```
 
 sw-toolbox does the same for Service Workers. It provides 5 methods that cause requests for URLs matching urlPattern to be resolved by calling handler. Matches requests using the GET, POST, PUT, DELETE or HEAD HTTP methods respectively.
 
-	toolbox.router.get(urlPattern, handler, options)
-	toolbox.router.post(urlPattern, handler, options)
-	toolbox.router.put(urlPattern, handler, options)
-	toolbox.router.delete(urlPattern, handler, options)
-	toolbox.router.head(urlPattern, handler, options)
-
+```javascript
+toolbox.router.get(urlPattern, handler, options)
+toolbox.router.post(urlPattern, handler, options)
+toolbox.router.put(urlPattern, handler, options)
+toolbox.router.delete(urlPattern, handler, options)
+toolbox.router.head(urlPattern, handler, options)
+```
 If you want more information about these strategies, check Jake Archibald’s [Offline Cookbook](https://jakearchibald.com/2014/offline-cookbook/)
 
 ## HTML and grid templates
@@ -260,46 +268,55 @@ Grids are newer and more intriguing.  You can create a grid similar to [Skeleton
 
 These are two SASS mixins for a prototype grid system I’m currently working on. 
 
-	@mixin grid-wrapper ($columns: 12, $gutter: 8){
-	  display: grid;
-	  margin: 0 auto;
-	  width: 100%;
-	  max-width: 960px;
-	  grid-template-columns: repeat($columns, 1fr); 
-	  // $columns columns of equal width
-	  grid-template-rows: auto; 
-	  // This should make new rows while respecting our column template
-	  grid-row-gap: ($gutter * 1px);
-	  grid-column-gap: ($gutter * 1px);
-	}
+```scss
+@mixin grid-wrapper ($columns: 12, $gutter: 8){
+	display: grid;
+	margin: 0 auto;
+	width: 100%;
+	max-width: 960px;
+	grid-template-columns: repeat($columns, 1fr); 
+	// $columns columns of equal width
+	grid-template-rows: auto; 
+	// This should make new rows while respecting our column template
+	grid-row-gap: ($gutter * 1px);
+	grid-column-gap: ($gutter * 1px);
+}
+```
 
 The first mixin will create the grid itself. In its default configuration it will create a 960px wide grid with 12 columns and 8px gutter. 
 
-	.grid-container {
-	  @include grid-wrapper()
-	}
+```scss
+.grid-container {
+	@include grid-wrapper()
+}
+```
 
 The values for the columns and gutters are configurable, if we want a 16 column grid with 16pixel gutters we can do call the mixin like this:
 
-	.grid-container {
-	  @include grid-wrapper(16, 16)
-	}
+```scss
+.grid-container {
+	@include grid-wrapper(16, 16)
+}
+```
 
 And SASS/CSS will create 16 equal columns with 16 pixel gutters between them and 16px gutters between rows. 
 
 The second mixin will place content inside the grid. 
 
-	
-	@mixin placement ($column-start, $column-end, $row-start, $row-end) {
-	  grid-row: $row-start / $row-end;
-	  grid-column: $column-start / $column-end;
-	}
+```scss
+@mixin placement ($column-start, $column-end, $row-start, $row-end) {
+	grid-row: $row-start / $row-end;
+	grid-column: $column-start / $column-end;
+}
+```
 
 We do this by specifying row and column start and end for each element. 
 
-	.figure1 {
+```scss
+.figure1 {
 	 @include placement(4, 5, 2, 4)
-	}
+}
+```
 
 Using the 16 column grid we created above, we’ll place the `figure ` with class  `figure1` in the corresponding coordinates:
 
@@ -314,6 +331,7 @@ See Rachel Andrew’s [Grid by example](http://gridbyexample.com/) for ideas and
 
 As far as HTML is concerned there are several things we need to include in our index.html file before it’ll pass the test of a progressive web application. There are also fallbacks for iOS and older Android devices.  Given all these requirements, the HTML for our index file may look like this:
 
+```html
 	<!doctype html>
 
 	<html lang="en">
@@ -372,6 +390,7 @@ As far as HTML is concerned there are several things we need to include in our i
 	</body>
 
 	</html> 
+```
 
 ## Javascript plugins and libraries
 
@@ -379,15 +398,15 @@ Transitioning from ES5 (current version of the Javascript language) to ES6 (appr
 
 We now have most, if not all, the construct once only available in libraries like jQuery, MOOTools or Dojo as part of the default language specification. Should we use a library like jQuery or Dojo?  
 
-As much as I woud love to work in plain ES6 there are things that frameworks smooth out a lot of browser bugs and inconsistencies as outlined by  John-David Dalton and Paul Irish in [their answer](https://docs.google.com/document/d/1LPaPA30bLUB_publLIMF0RlhdnPx_ePXm7oW02iiT6o/edit#) to [You May Not Need jQuery](#). 
+As much as I woud love to work in plain ES6 there are things that frameworks smooth out a lot of browser bugs and inconsistencies as outlined by  John-David Dalton and Paul Irish in [their answer](https://docs.google.com/document/d/1LPaPA30bLUB_publLIMF0RlhdnPx_ePXm7oW02iiT6o/edit#) to You May Not Need jQuery. 
 
 As suggested by Paul Irish I’ve run the following command against the jQuery source to see how many of these bugs (as defined by the comment Support:) are in the jQuery sourcecode
 
-	curl http://code.jquery.com/jquery-git.js | grep -n Support: | wc -l
+`curl http://code.jquery.com/jquery-git.js | grep -n Support: | wc -l`
 
 It returned 103 instances where jQuery is working to support some older kind of browser.  
 
-	curl https://code.jquery.com/jquery-3.0.0-beta1.js | grep -n Support: | wc -l
+`curl https://code.jquery.com/jquery-3.0.0-beta1.js | grep -n Support: | wc -l`
 
 The same command against the release version of jQuery 3.0 Beta returns 101 instances which is interesting considering that jQuery 3.0 dropped support for IE8. 
 
@@ -404,76 +423,85 @@ Furthermore jQuery 3.0’s modular build process allows you to remove modules fr
 
 To work with CSS we take all the classes Modernizr inserts in the HTML element.  The example below shows all the features from a custom Modernizr build in Chrome 50. 
 
-	htmlimports cookies geolocation json postmessage serviceworker svg templatestrings typedarrays websockets webaudio supports no-es6array es6collections generators es6math es6number es6object promises no-contains documentfragment audio canvas canvastext contenteditable video webanimations webgl bgpositionshorthand csscalc cssgradients multiplebgs opacity csspointerevents cssremunit rgba csschunit no-es6string mediaqueries unicode fontface generatedcontent lastchild nthchild cssvhunit cssvmaxunit cssvminunit cssvwunit fullscreen indexeddb indexeddb-deletedatabase requestanimationframe raf backgroundblendmode cssanimations bgpositionxy bgrepeatround bgrepeatspace backgroundsize bgsizecover borderradius boxshadow boxsizing csscolumns csscolumns-width csscolumns-span csscolumns-fill csscolumns-gap csscolumns-rule csscolumns-rulecolor csscolumns-rulestyle csscolumns-rulewidth csscolumns-breakbefore csscolumns-breakafter csscolumns-breakinside cssfilters flexbox cssmask shapes csstransforms csstransforms3d csstransitions
+```
+htmlimports cookies geolocation json postmessage serviceworker svg templatestrings typedarrays websockets webaudio supports no-es6array es6collections generators es6math es6number es6object promises no-contains documentfragment audio canvas canvastext contenteditable video webanimations webgl bgpositionshorthand csscalc cssgradients multiplebgs opacity csspointerevents cssremunit rgba csschunit no-es6string mediaqueries unicode fontface generatedcontent lastchild nthchild cssvhunit cssvmaxunit cssvminunit cssvwunit fullscreen indexeddb indexeddb-deletedatabase requestanimationframe raf backgroundblendmode cssanimations bgpositionxy bgrepeatround bgrepeatspace backgroundsize bgsizecover borderradius boxshadow boxsizing csscolumns csscolumns-width csscolumns-span csscolumns-fill csscolumns-gap csscolumns-rule csscolumns-rulecolor csscolumns-rulestyle csscolumns-rulewidth csscolumns-breakbefore csscolumns-breakafter csscolumns-breakinside cssfilters flexbox cssmask shapes csstransforms csstransforms3d csstransitions
+```
 
 The same build reflected in Safari 9.1.1 in Yosemite. 
 
-	no-htmlimports cookies geolocation json postmessage no-serviceworker svg templatestrings typedarrays websockets webaudio supports es6array es6collections no-generators es6math es6number es6object promises no-contains documentfragment audio canvas canvastext contenteditable video no-webanimations webgl bgpositionshorthand csscalc cssgradients multiplebgs opacity csspointerevents cssremunit rgba csschunit no-es6string mediaqueries unicode fontface generatedcontent lastchild nthchild cssvhunit cssvmaxunit cssvminunit cssvwunit fullscreen indexeddb indexeddb-deletedatabase requestanimationframe raf backgroundblendmode cssanimations bgpositionxy bgrepeatround bgrepeatspace backgroundsize bgsizecover borderradius boxshadow boxsizing csscolumns csscolumns-width csscolumns-span csscolumns-fill csscolumns-gap csscolumns-rule csscolumns-rulecolor csscolumns-rulestyle csscolumns-rulewidth csscolumns-breakbefore csscolumns-breakafter csscolumns-breakinside cssfilters flexbox cssmask shapes csstransforms csstransforms3d csstransitions
-
+```
+no-htmlimports cookies geolocation json postmessage no-serviceworker svg templatestrings typedarrays websockets webaudio supports es6array es6collections no-generators es6math es6number es6object promises no-contains documentfragment audio canvas canvastext contenteditable video no-webanimations webgl bgpositionshorthand csscalc cssgradients multiplebgs opacity csspointerevents cssremunit rgba csschunit no-es6string mediaqueries unicode fontface generatedcontent lastchild nthchild cssvhunit cssvmaxunit cssvminunit cssvwunit fullscreen indexeddb indexeddb-deletedatabase requestanimationframe raf backgroundblendmode cssanimations bgpositionxy bgrepeatround bgrepeatspace backgroundsize bgsizecover borderradius boxshadow boxsizing csscolumns csscolumns-width csscolumns-span csscolumns-fill csscolumns-gap csscolumns-rule csscolumns-rulecolor csscolumns-rulestyle csscolumns-rulewidth csscolumns-breakbefore csscolumns-breakafter csscolumns-breakinside cssfilters flexbox cssmask shapes csstransforms csstransforms3d csstransitions
+```
 The examples below use the test for HTML audio. 
 
 When working with CSS we create 2 selectors based on the result of the classes Modernizr added.  If the browser does not support audio the class added will be `.no-audio` and we will hide the `#music` element. If we support audio then the class is just `.audio` and we style elements accordingly. 
 
-	/* In your CSS: */
+```css
+/* In your CSS: */
 	.no-audio #music {
 	   display: none; /* Don't show Audio options */
 	}
 	.audio #music button {
 	   /* Style the Play and Pause buttons nicely */
 	}
-
+```
 When working with Javascript we test on the Modernizr object for the element we want to test, in this case audio. 
 
-	if (!Modernizr.audio) {
+```javascript
+if (!Modernizr.audio) {
 	   /* properties for browsers that do not support audio */
-	}
-	
-	else{
+} else{
 	   /* properties for browsers that support audio */
-	}
-
+}
+```
 ### CSS @supports
 
 An alternative to libraries like Modernizr is to use the `@supports` rule. It takes the full propery that you’re testing for and what to do if the property is supported. 
 
-	@supports (display: flex) {
+```css
+@supports (display: flex) {
 		div { display: flex; }
-	}
+}
+```
 
 You can also use not to negate the test. The example below returns true for browsers that **do not** support the native flex property. 
 
-	@supports not (display: flex) {
+```css
+@supports not (display: flex) {
 		div { float: left; } /* alternative styles */
-	}
-
+}
+```
 Many browsers support prefixed versions of  attributes and properties. We can test for them simultaneously using **or** as in the exmple below where we @support will return true if the browser supports any of the flex values. 
 
-	@supports (display: -webkit-flex) or
-	          (display: -moz-flex) or
-	          (display: flex) {
-	
-	    /* use styles here */
-	}
+```css
+@supports (display: -webkit-flex) or
+          (display: -moz-flex) or
+          (display: flex) {
 
+	    /* use styles here */
+}
+```
 We can also chain our properites to gether and return true only if both properties are supported (and why would you want to use appearance: caret is beyond me, it’s just an example.)
 
-	@supports (display: flex) and (-webkit-appearance: caret) {
+```css
+@supports (display: flex) and (-webkit-appearance: caret) {
 		/* something crazy here */
-	}
+}
+```
 
 #### JavaScript CSS.supports
 
 The JavaScript counterpart to CSS @supports is window.CSS.supports.  The CSS.supports spec provides two methods of usage.  The first method of usage includes providing two arguments: one for the property and another for the value:
 	
-	var supportsFlex = CSS.supports("display", "flex");
+`var supportsFlex = CSS.supports("display", "flex");`
 
 The second usage method includes simply providing the entire string to be parsed:
 
-	var supportsFlexAndAppearance = CSS.supports("(display: flex) and (-webkit-appearance: caret)");
+`var supportsFlexAndAppearance = CSS.supports("(display: flex) and (-webkit-appearance: caret)");`
 
 Before using the JavaScript method of supports, it's important to detect the feature first.  Older versions of Opera used a different method name so that throws things for a bit. We need to validate this method is still neccessary
 	
-	var supportsCSS = !!((window.CSS && window.CSS.supports) || window.supportsCSS || false);
+`var supportsCSS = !!((window.CSS && window.CSS.supports) || window.supportsCSS || false);`
 
 ### Annotation plugin
 
@@ -483,24 +511,27 @@ I’ve always loved the way that Amazon’s Kindle allows you to create a commun
 
 To use annotator we load the script and css required.  This may change if we concatenate all the scripts together. 
 
-	<script src="http://assets.annotateit.org/annotator/v1.2.5/annotator-full.min.js"></script>
-	<link rel="stylesheet" href="http://assets.annotateit.org/annotator/v1.2.5/annotator.min.css">
-
+```html
+<script src="http://assets.annotateit.org/annotator/v1.2.5/annotator-full.min.js"></script>
+<link rel="stylesheet" href="http://assets.annotateit.org/annotator/v1.2.5/annotator.min.css">
+```
 We then configure the annotator plugin with code like the ones below where we perform multiple configuration tasks for the plugin. 
 
-	$( document ).ready(function() {
-	  // Customise the default plugin options with the third argument.
-	  $('#content').annotator()
-	    .annotator('setupPlugins', {}, {
-	      // Disable the tags plugin
-	      Tags: false,
-	      // Filter plugin options
-	      Filter: {
-	        addAnnotationFilter: false, // Turn off default annotation filter
-	        filters: [{label: 'Quote', property: 'quote'}] // Add a quote filter
-	      }
-	    });
+```javascript
+$( document ).ready(function() {
+	// Customise the default plugin options with the third argument.
+	$('#content').annotator()
+	.annotator('setupPlugins', {}, {
+		// Disable the tags plugin
+		Tags: false,
+		// Filter plugin options
+		Filter: {
+			addAnnotationFilter: false, // Turn off default annotation filter
+	    filters: [{label: 'Quote', property: 'quote'}] // Add a quote filter
+	  }
 	});
+});
+```
 
 The annotator system also requires [showdown.js](https://github.com/showdownjs/showdown) in order to run Markdown on your annotations, otherwise they are just text.  
 
@@ -538,22 +569,6 @@ A commercial alternative for animations is GSAP
 
 
 #### Snap SVG
-
-## SASS/CSS partials and plugins
-
-### CSS Grids
-	@mixin grid-wrapper ($width: 60, $columns: 12, $gutter: 8){
-	  display: grid;
-	  width: $width * 1em;
-	  grid-template-columns: repeat($columns, 1fr); 
-	  grid-template-rows: auto;
-	  grid-gap: ($gutter * 1px) ($gutter * 1px);
-	}
-	
-	@mixin placement ($column-start, $column-end, $row-start, $row-end) {
-	  grid-row: $row-start / $row-end;
-	  grid-column: $column-start / $column-end;
-	}
 
 ## Typography, web fonts and lettering
 
