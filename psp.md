@@ -1,10 +1,9 @@
 # Long form publishing with progressive subcompact applications
 
 For the past few months I’ve been working at Google building a set of instructor-led courses on how to build progressive web applications. This has made me think of how to push some of these concepts into what I call “Progressive subcompact publications”.  These concepts are different than ePub Next and any number of formats vining for use, each of wich have issues that are hard to overcome:
-
 * They seek to replace the installed EPUB (and Kindle) user base.  Since most users of iBooks and Kindles are locked in to their devices and readers this is not a good idea
 * There will never be uniform buy in to new specs or ways to publish content and, unless you can get a majority of publishers to implement your specification, schema or idea you will be competing with a behemoth that is very slow to evolve (not questioning the reasons, just making a statement)
-* 5Doc is trying to establish itself as a defacto standard (use this instead of what you already have) and that’s dangerous. 
+* Some people are trying to establish their format as a defacto standard (use this instead of what you already have) and that’s dangerous. 
 	* It’s dangerous if you fail to get full buy in because it segments the market even further
 	* it’s dangerous if you succeed because the defacto standard becomes a dejure standard and you have to support it and work all the warts that were ok when you were developing it (check the Javascript specifications for the amount of baggage carried over to keep old code from breaking)
 
