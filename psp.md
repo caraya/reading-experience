@@ -1,6 +1,6 @@
-# Long form publishing with  progressive subcompact applications
+# Long form publishing with progressive subcompact applications
 
-For the past few months I’ve been working on a set of instructor-led courses on how to build progressive web applications. This has made me think of how to push some of these concepts into what I call “Progressive subcompact publications”.  These concepts are different than ePub Next and [5doc](http://www.5doc.org/) each of wich have issues that are hard to overcome:
+For the past few months I’ve been working at Google building a set of instructor-led courses on how to build progressive web applications. This has made me think of how to push some of these concepts into what I call “Progressive subcompact publications”.  These concepts are different than ePub Next and any number of formats vining for use, each of wich have issues that are hard to overcome:
 
 * They seek to replace the installed EPUB (and Kindle) user base.  Since most users of iBooks and Kindles are locked in to their devices and readers this is not a good idea
 * There will never be uniform buy in to new specs or ways to publish content and, unless you can get a majority of publishers to implement your specification, schema or idea you will be competing with a behemoth that is very slow to evolve (not questioning the reasons, just making a statement)
@@ -8,7 +8,7 @@ For the past few months I’ve been working on a set of instructor-led courses o
 	* It’s dangerous if you fail to get full buy in because it segments the market even further
 	* it’s dangerous if you succeed because the defacto standard becomes a dejure standard and you have to support it and work all the warts that were ok when you were developing it (check the Javascript specifications for the amount of baggage carried over to keep old code from breaking)
 
-Instead I’m looking at the progressive web applications as a starting point for an exploration of how far we can push the web as a publishing medium.
+Instead I’m looking at progressive web applications as a starting point for an exploration of how far we can push the web as a publishing medium.
 
 ## What are progressive web applications
 
@@ -63,9 +63,7 @@ Furthermore Craig describes subcompact publications as having the following char
 
 Reading the essay it shows that it’s geared towards magazines but, with a few modifications, it applies equally to books and other long form content.  For this project, geared towards books and other collection types of publications, I’ve changed some of the definitions of Subcompact Publishing as listed below:
 
-* **Small issue sizes (3-7 articles / issue) / Small file sizes** Because we are using technologies that allow us to load content on demand and to cache the content on the user's browser the need to keep the content small, both issue size and file size becomes less relevant. We can load the shell of our book independently of the content and load the content in smaller bites. For example we can load the first 10 chapters of a book right away and then load the rest of the content on demand  
-	  
-	This does not mean we should forget about best practices in compressing and delivering the content but with Service Workers and caching available we can worry more about the content itself rather than how it's delivered. If we add http2 and server push to the mix  the speed gain becomes significant if implemented correctly
+* **Small issue sizes (3-7 articles / issue) / Small file sizes** Because we are using technologies that allow us to load content on demand and to cache the content on the user's browser the need to keep the content small, both issue size and file size becomes less relevant. We can load the shell of our book independently of the content and load the content in smaller bites. For example we can load the first 10 chapters of a book right away and then load the rest of the content on demand. This does not mean we should forget about best practices in compressing and delivering the content but with Service Workers and caching available we can worry more about the content itself rather than how it's delivered. If we add http2 and server push to the mix  the speed gain becomes significant if implemented correctly
 
 * **Fluid publishing schedule** Because we can update the content of our web publications whenever it's necessary we can push new or updated content at any point, without having to worry about releasing the entire package again or having to go through a vendor's store approval process
 
@@ -73,7 +71,7 @@ Reading the essay it shows that it’s geared towards magazines but, with a few 
 
 * **Clear navigation** We have trained our users to accept certain metaphors for navigating our web applications. There is no compelling reason to change that now and, if there is, it better be a very good reason
 
-* **HTML based** Here is the main divergent point from Craig's conception of subcompact publications. PSPs are meant for the web and, if the developer chooses, for HTML-based publishing formats. EPUB and, especially, Kindle are closed ecosystems where it's very difficult to get in to the ecosystem beyond using the tools they provide to adapt your format to their specifications...  It is already hard enough to work with different browsers and the uneven CSS support… none of the existing tools handle epub readers and their own prefixing requirements
+* **HTML based** Here is the main divergent point from Craig's conception of subcompact publications. PSPs are meant for the web and, if the developer chooses, for HTML-based publishing formats. iBooks and, especially, Kindle are closed ecosystems where it's very difficult to get in to the ecosystem beyond using the tools they provide to adapt your format to their specifications...  It is already hard enough to work with different browsers and the uneven CSS support… none of the existing tools handle epub readers and their own prefixing requirements
 
 * **Using the open web** One of the biggest draws of the web is that it requires no installation proccess or approval for content delivery to the end users. Leveraging this makes the idea of Progressive Subcompact publications easier to work with, even if DRM and other rights management issues are not tackled from the start
 
@@ -95,6 +93,7 @@ This is a fairly common pattern to build a service worker that will perform the 
 * Fetches app resources using a ‘cache first strategy’. If the content requested is in the cache then serve it from there. If it’s not on the cache then make a network request for the resource, serve it to the user and put it in the cache for later requests
 
 	var CACHE_NAME = 'my-site-cache-v1';
+	var cacheWhitelist = [CACHE_NAME];
 	var urlsToCache = [
 	  '/',
 	  '/styles/main.css',
@@ -113,7 +112,6 @@ This is a fairly common pattern to build a service worker that will perform the 
 	});
 	
 	self.addEventListener('activate', function(event) {
-	  var cacheWhitelist = [CACHE_NAME];
 	  event.waitUntil(
 	    caches.keys().then(function(cacheNames) {
 	      return Promise.all(
@@ -148,7 +146,7 @@ This is a fairly common pattern to build a service worker that will perform the 
 	            return response;
 	          })
 	          .catch(function(error) {
-	            console.log('I am unable to complete the request: ', error);
+	            console.log('[Service Worker] unable to complete the request: ', error);
 	          });
 	      })
 	  );
@@ -156,7 +154,7 @@ This is a fairly common pattern to build a service worker that will perform the 
 
 There are things that we are not covering on purpose for the sake of keeping the code short. Some of these things include:
 
-* For this example we’ve assumed a minimal set of elements to cache for the application shell. We can be more detailed and add fonts and other satic resources
+* For this example we’ve assumed a minimal set of elements to cache for the application shell. We can be more detailed and add fonts and other static resources. We may also assign the array of items to cache on install to a variable to make it easier to work with
 * Providing a solution for when the content is not in the cache and the network is not available. We can cache default feedback for text-based content or programmatically generate an svg image for fallback
 * Putting content in different caches so deleting one group of resources doesn’t delete all of them
 * We make no effort to add hashes to the resources we cache so we can do proper HTTP cache busting when needed
@@ -169,9 +167,9 @@ Assuming that we saved the service worker as `sw.js` we can write the code below
 
 	if ('serviceWorker' in navigator) {
 	 console.log('Service Worker is supported');
-	 navigator.serviceWorker.register('sw.js').then(reg => {
+	 navigator.serviceWorker.register('sw.js').then(function(reg) {
 	   console.log('Yay!', reg);
-	 }).catch(err => {
+	 }).catch(function(err) {
 	   console.log('boo!', err);
 	 });
 	}
@@ -181,6 +179,109 @@ This script checks for service worker support by testing if the string `serviceW
 If the serviceWorker string doesn’t exist in the navigator object then service workers are not supported. The catch statement will trigger and we log something to the console.
 
 That’s it. The combination of those two scripts gives us consistent performance across devices and the possibility of work offline after accessing the content once while online. 
+
+## Service Worker: Next step
+Doing it by hand is fun and teaches you a lot about the inner workings of service workers but having to update the files you want to cache and how to define the routes you want to use to cache your content. 
+
+[sw-precache](https://github.com/GoogleChrome/sw-precache/blob/master/GettingStarted.md) is a Google tool developed to atuomate creation of service workers with application shell caching on installation. The tool can be used from command line or as part of a build system (Grunt, Gulp and others). 
+
+It will also take care of importing additional scripts to use sw-toolbox (described in the next section). 
+
+A gulpfile.js using sw-precache looks like this:
+
+	// Assigning modules to local constants
+	var gulp = require('gulp');
+	// Required for sw-precache
+	var path = require('path');
+	var swPrecache = require('sw-precache');
+	// Array of paths. Currently only uses the src to represent the path to source
+	var paths = {
+	  src: './'
+	};
+	
+	gulp.task('service-worker', function(callback) {
+	  swPrecache.write(path.join(paths.src, 'service-worker.js'), {
+	    staticFileGlobs: [
+	      paths.src + 'index.html',
+	      paths.src + 'js/main.js',
+	      paths.src + 'css/main.css',
+	      paths.src + 'images/**/*'
+	
+	    ],
+	    importScripts: [
+	      'node_modules/sw-toolbox/sw-toolbox.js',
+	      paths.src + 'js/toolbox-scripts.js'
+	    ],
+	    stripPrefix: paths.src
+	  }, callback);
+	});
+[sw-toolbox](https://googlechrome.github.io/sw-toolbox/docs/master/tutorial-usage) automates dynamic caching for your service worker. It creates customizable routes for your caching and provides for express-like or regular-expression-based routes to match routes and resources. 
+
+In the gulpfile.js abov the `importScripts` section imports two files:
+
+* sw-toolbox.js is the library that will run the custom routes
+* toolbox-scripts contains our custom toolbox routing
+
+The script itself is wrapped in an immediately-invoked function expression (IIFE) to keep our code from polluting the global namespace. Inside the IIFE we work with different routes. 
+
+All these routes use the get HTTP verb to represent the action the router will take. 
+
+The toolkbox then takes a pattern to match the route against and a cache strategy. 
+
+There is an optional cache object that contains additional parameters for the cache like (cache) name, maximum number of entries (maxEntries) and maximum duration of the cache in seconds. 
+
+The `toolbox-scripts.js` looks like this:
+
+	(function(global) {
+	  'use strict';
+	
+	  // The route for any requests from the googleapis origin
+	  global.toolbox.router.get('/(.*)', global.toolbox.cacheFirst, {
+	    cache: {
+	      name: 'googleapis',
+	      maxEntries: 20,
+	    },
+	    origin: /\.googleapis\.com$/
+	  });
+	
+	// We want no more than 50 images in the cache. 
+	// We use a cache first strategy
+	  global.toolbox.router.get(/\.(?:png|gif|jpg)$/, global.toolbox.cacheFirst, {
+	    cache: {
+	      name: 'images-cache',
+	      maxEntries: 50
+	    }
+	  });
+	
+	  // pull html content using network first
+	  global.addEventListner('fetch', function(event) {
+	    if (event.request.headers.get('accept').includes('text/html')) {
+	      event.respondWith(toolbox.networkFirst(event.request));
+	    }
+	    // you can add additional synchronous checks 
+	    // based on event.request.
+	  });
+	
+	  // pull video using network only. 
+	  // We don't want such large files in the cache
+	  global.toolbox.router.get('(.+)', global.toolbox.networkOnly, {
+	    origin: /\.(?:youtube|vimeo)\.com$/
+	  });
+	
+	  // the default route is global and uses cacheFirst
+	  global.toolbox.router.get('/*', global.toolbox.cacheFirst);
+	})(self);
+
+Registering the automatically generated service worker is no different than registering the manually generated script. Assuming that we saved the service worker as `service-worker.js`the registration code in our entry page (`index.html`) looks like this:
+
+	if ('serviceWorker' in navigator) {
+	 console.log('Service Worker is supported');
+	 navigator.serviceWorker.register('sw.js').then(reg => {
+	   console.log('Yay!', reg);
+	 }).catch(err => {
+	   console.log('boo!', err);
+	 });
+	}
 
 ## What can we do beyond offline?
 
@@ -193,13 +294,13 @@ While not directly related to service workers this feature may help get better r
 
 * Installation on mobile homescreens
 
-We’ll discuss them briefly in the sections below.
+We’ll discuss them in the sections below.
 
 ### Push notifications
 
 Using Push notifications we can communicate events and new information to the user through the Operating System’s push notification system and UI. 
 
-![](https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/images/joe-asked-contextual.png)
+![](https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/images/cc-good.png)
 
 Detailed instructions for setting up Push Notifications using Chrome and Firebase Cloud Messaging (the successor to Google Cloud Messaging) can be found in [Push Notifications on the Open Web](https://developers.google.com/web/updates/2015/03/push-notifications-on-the-open-web?hl=en). 
 
@@ -216,22 +317,44 @@ This API provides a web equivalent to native application platforms’ [job sched
 A more detailed explanation can be found in the [explainer document for background sync](https://github.com/WICG/BackgroundSync/blob/master/explainer.md).
 
 ### Install in mobile homescreens
+
 Using the [W3C App Manifest specification](https://www.w3.org/TR/appmanifest/) and the existing metatags for adding an app to the homescreen in mobile devices we enable our users to add our web content to the homescreen of mobile devices to foster a higher level of interaction and reengagement with the content.  
 
-[HTML5 Doctor](#) has a good an up to date reference on App Manifest. Another source of information is the Mozilla Developer Network article on [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest). 
+[HTML5 Doctor](http://html5doctor.com/web-manifest-specification/) has a good an up to date reference on App Manifest. Another source of information is the Mozilla Developer Network article on [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest). 
+
+## Other fun things we can do
+
+### Annotations
+I still remember the first time I made an annotation from a Kindle book available in  their public site ([kindle.amazon.com](http://kindle.amazon.com/)). I saw the possibilities as limitless until I realized that there were limitless as long as you bought the book from Amazon and read it on a Kindle device or application. 
+
+Every time I’ve turned around and searched for some way to annotate the web. I think PSPs are the perfect place to put this in practice. There are two libraries I think are particularly appropriate: [Emphasis](#) and [annotator.js](http://annotatorjs.org/) which provide different ways to make and share annotations from your PSPs.
+
+Emphasis provides dynamic paragraph-specific anchor links and the ability to highlight text in a document, it makes the information about the highlighted elements of the page available in the URL hash so it can be emailed, bookmarked, or shared.
+
+annotator provides a more traditional annotation interface that is closer in spirit to the Kindle annotation UI that attracted me to the concept when I first saw it. 
+
+![](http://annotatorjs.org/images/thumb-add.png) ![](http://annotatorjs.org/images/thumb-viewer.png)![](http://annotatorjs.org/images/thumb-bookmarklet.png)
+
+Another tool that sounds interesting is MIT’s [Annotation Studio](http://www.annotationstudio.org/) but it seems to be geared towards MIT Hyperstudio’s larger project and not necessarily ready as a standlone solution, that said, your milleage may vary. 
+
+The thing to consider if how these annotation tools store the annotations. Do they use server-side databases? If so how do we cache new annotations when the reader is offline? Google Analytics provides a possible example where we store the annotations in indexedDB and then play them back when the user goes online. 
 
 ## Structuring and styling our content
 We want our content to look awesome regardless of the device. How do we accomplish this?
 
-I like the way Polymer does their default appication when running the Polymer CLI.  It shouldn’t be too hard to duplicate that layout using Foundation or Material Design Light. 
+A good starting point is Ethan Marcotte’s [Responsive Web Design](https://abookapart.com/products/responsive-web-design) (or whatever Responsive Web Design book is your favorite). We want the experience to scale to whatever device or platform we’re targeting and, whatever design we choose, the first thing we need to make sure of is that it’ll work well in phones, tablets and desktops (in other words, everywhere there is a browser). 
 
 Once we have a layout we can start thinking about, what to me is, the most important part of any long form project: typography.  I’ve [written extensively](https://caraya.github.io/book-app/app/typography.html) on what typography is and how it works on the web now we need to take the next steps. 
+
+This is where the first set of choices happen: What layout do we choose? How do we create something engaging without becoming repetitive? How do we craft a reading experience that matches the content?
 
 <div class="video">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/kRYrbcGWjzU?rel=0" frameborder="0" allowfullscreen></iframe>
 </div>
 
-I first saw Jen’s presentation in SFHTML5. I see it as a challenge and an opportunity to think differently about the way we create and layout our content on the web. 
+I first saw Jen’s presentation in SFHTML5. I see it as a challenge and an opportunity to think differently about the way we create and layout our content on the web.  For longer form content this also speaks to letting the content dictate the layout and not the other way around.  What is it that makes magazine layouts so interesting? 
+
+I collect electronic versions of GQ, Wired, Vanity Fair, Fast Company and Harvard Business Review and the biggest question when I read them is how can we make this reading experience in the open web? The ads from magazines are what intrigue me the most… and where a lot of my most radical ideas come from. 
 
 <div class="video">
 <iframe src="https://player.vimeo.com/video/112865159?color=9c191e" width="560" height="315" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
@@ -239,23 +362,129 @@ I first saw Jen’s presentation in SFHTML5. I see it as a challenge and an oppo
 
 After watching this presentation from Beyond Tellerand I couldn’t help reading the new edition of [Hardboiled Web Design](https://shop.smashingmagazine.com/products/hardboiled-web-design). Clarke advocates that creativity should be at the center of our online design work... It speaks to the need of art directed web design and bespoke designs rather than using the same design over and over. 
 
-If we drop the book metahphor from our online reading experiences, There is no limit to what we can do wit our online publications.   We need to go back to our content and see how we can enrich it and what technologies we can use to do so. 
+If we drop the book metahphor from our online reading experiences, There is no limit to what we can do with our online publications.   We need to go back to our content and see how we can enrich it and what technologies we can use to do so… we have a lot of layout tools that, a few years ago, were only possible in InDesign and other Desktop Publishing Tools or took a lot of extra workarounds to do in CSS/HTML/JavaScript. 
 
-A good starting point is Ethan Marcotte’s [Responsive Web Design](https://abookapart.com/products/responsive-web-design) (or whatever Responsive Web Design book is your favorite)
+Now we need to get out our collective comfort zone and challenge both ourselves and our future readers with layouts that go beyond what we see on the web today.  
 
-## How have reader expectations changed?
-as consumers of information we’ve all become more demanding. We want the content faster and we want to be engaged with the content we access online.  PSPs should be no different in their performance to traditional web applications.
+One last example of what we can do with our new css tools and how much we can be true to our creative selves without having to lie to our web developer selves: Justin McDowell uses new CSS technologies to recreate works from the Bauhaus school. 
 
-(Add stats about attention span)
+<div class='video'>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/I49NX1C8qt8" frameborder="0" allowfullscreen></iframe>
+</div>
 
-## Do all paradigms for copy protection and owner rights apply?
+## How have reader expectations changed? (UI for the performance obsessed)
+as consumers of information we’ve all become more demanding. We want the content faster and we want to be engaged with the content we access online.  PSPs should be no different in their performance to traditional web applications. 
 
-## Is it useful to build cross platform versions of our publications? If so what tool should we use?
+Rather than provide a one-size-fits-all solution I present some of the data Nielsen first articulated in 1993’s *Usability Engineering * We’ll use these values to draw some basic conclusions that will start the thinking about performance and how PSPs can work towards achieving those performance goals.
 
-### Electron
+* **0.1 seconds** — Operations that are completed in 100ms or fewer will feel instantaneous to the user. This is the gold standard that you should aim for when optimising your websites.
+* **1 second** — Operations that take 1 second to finish are generally OK, but the user will feel the pause. If all of your operations take 1 second to complete, your website may feel a little sluggish.
+*  **10 seconds** — If an operation takes 10 seconds or more to complete, you’ll struggle to maintain the user’s attention. They may switch over to a new tab, or give up on your website completely. Of course this depends on what operation is being completed. For example, users are more likely to stick around if they’ve just submitted their card details in the checkout than if they’re waiting to load a product page.
+*  **16 milliseconds** — Given a screen that is updating 60 times per second, this window represents the time to get a single frame to the screen (1000 ÷ 60 = ~16). People are exceptionally good at tracking motion, and they dislike it when their expectation of motion isn’t met, either through variable frame rates or periodic halting.
 
-### Cordova / Phone Gap
+We want to get to the site’s first meaningful paint on initial load in as close to 1000 milliseconds as possible. 
 
-## Links, Resources and Recipes 
+Animations should take no more than 16 milliseconds in order to reach 60 frames a second.
 
+### Performance Optimizations
+We can optimize our resources so that time to first meaningful interaction is as short as possible. First load will also cache the resources needed for our application shell and then dynamically .  We want to optimize this to last as little as possible.  
+
+This is not just speech for the sake of speach. Take the following graphic (from Soasta’s [Page bloat update: The average web page is more than 2 MB in size](https://www.soasta.com/blog/page-bloat-average-web-page-2-mb/)).  How can we minimize the number of resources to load and cache the first time we access a page? How many of these resources can be reused on pages accross the site? How can we optimize images to reduce their size?
+
+![](https://www.soasta.com/wp-content/uploads/2015/06/page-bloat-images.png)
+
+We have gotten lazy or, possibly, made the wrong assumptions. The graphic below, also from Soasta’s blog post, show how the size of our web content has changed over the years… and it shows no signs of decreasing. 
+
+![](https://www.soasta.com/wp-content/uploads/2015/06/page-bloat-May15-page-composition.png)
+
+For a more complete perspective checkout Udacity’s [Website Performance Optimization](https://www.udacity.com/course/website-performance-optimization--ud884)optimization course. 
+
+### How are you serving your content?
+
+PSPs do not avoid performance requirement…. however the questions are slightly different. Are you serving your content with HTTP 1.x or HTTP2? When I first heard the question asked I laughed… why should this matter?
+
+HTTP2 has changed the way we work with web content. What we used to consider as patterns and best practices are no longer necessay and may be considered anti patterns.  
+
+Because of the way HTTP2 serves the content it is not necessary to concatenate our CSS and Javascript, it actually work better if you work with individual minimized files; HTTP2:
+
+* is binary, instead of textual: Binary protocols are more efficient to parse, more compact “on the wire”, and most importantly, they are much less error-prone, compared to textual protocols like HTTP/1.x, because they often have a number of affordances to “help” with things like whitespace handling, capitalization, line endings, blank lines and so on
+* is fully multiplexed: Multiplexing addresses [head-of-line-blocking](https://www.wikiwand.com/en/Head-of-line_blocking) by allowing multiple request and response messages to be in flight at the same time; it’s even possible to intermingle parts of one message with another on the wire
+* can use one connection for parallelism: One application opening many connections simultaneously breaks a lot of the assumptions that TCP was built upon; since each connection will start a flood of data in the response, there’s a real risk that buffers in the intervening network will overflow, causing a congestion event and retransmits
+* uses header compression to reduce overhead:  If you assume that a page has about 80 assets and each request has 1400 bytes of headers, it takes at least 7-8 round trips to get the headers out “on the wire”. In comparison, even mild compression on headers allows those requests to get onto the wire within one roundtrip – perhaps even one packet.
+* allows servers to “push” responses proactively into client caches: When the server pushes the content that the client will need before it needs it we can save networks requests by caching the content in the browser (HTTP) cache 
+
+This doesn’t mean we shouldn’t minimize and compress resources but bundling them together is less important now that we don’t have to be concerned with saturating the connection to the server and can leverage HTTP2 push to let the server prefetch content to the client.  
+
+Improving performance is a never ending game. Ilya Grigorik illustrates this point in his presentation from I/O 2016. 
+
+<div class="video">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/aqvz5Oqs238?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+
+### Links, resources, patterns and ideas
+* Responsive Web Design
+	* [Responsive Web Design](https://abookapart.com/products/responsive-web-design) — Ethan Marcotte, A Book Apart
+	* [Responsible Responsive Design](https://abookapart.com/products/responsible-responsive-design) — Scott Jehl, A Book Apart
+	* [Going Responsive](https://abookapart.com/products/going-responsive) — Karen McGrane, A Book Apart
+	* [Responsive Design: Patterns and Principles](https://abookapart.com/products/responsive-design-patterns-principles) — Ethan Marcotte, A Book Apart
+	* [Design For Real Life](https://abookapart.com/products/design-for-real-life) — Eric Mayer & Sara Wachter-Boettcher, A Book Apart
+	* [Inclusive Design Patterns](https://www.smashingmagazine.com/books/#inclusive-design-patterns) — Haydon Pickering, Smashing Books
+* Service Workers
+	* [caniuse.com support matrix](http://caniuse.com/#feat=serviceworkers)
+	* [Specification](https://w3c.github.io/ServiceWorker/)
+	* [Is ServiceWorker ready?](https://jakearchibald.github.io/isserviceworkerready/resources.html) — Jake Archibald
+	* [Service Workers: an Introduction](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers) — Web Fundamentals
+	* [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) — MDN 
+	* Support by browsers
+		* [MS Edge](https://developer.microsoft.com/en-us/microsoft-edge/platform/status/serviceworker/)
+		* [WebKit - Safari](https://webkit.org/status/#specification-service-workers)
+		* [Firefox](https://platform-status.mozilla.org/#service-worker)
+		* [Chrome / Opera](https://www.chromestatus.com/feature/6561526227927040)
+	* Background Sync
+		* [Explainer](Background%20synchronization%20explained)
+* Accessibility
+	* [A11y Project](http://a11yproject.com/)
+	* Chrome [Accessibility Developer Tools](accessibility-developer-tools)
+	* [A11y accessibility checker](https://www.w3.org/TR/appmanifest/)
+	* [Introduction to web accessibility course](https://webaccessibility.withgoogle.com/course) — Google
+	* [The WAI Forward](https://www.smashingmagazine.com/2014/07/the-wai-forward/) — Heydon Pickering, Smashing Magazine
+	* [Colour Contrast Analyser](https://www.paciellogroup.com/resources/contrastanalyser/)— The Paciello Group
+	* [Accessibility Testing Tools Updated](https://www.paciellogroup.com/blog/2014/10/accessibility-testing-tools-updated/) — The Paciello Group
+* Service Worker related
+	* Web Push Notifications
+		* [Web Push Notifications: Timely, Relevant, and Precise](https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/) — Web Fundamentals
+		* [What Makes a Good Notification?](https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/good-notification)
+		* [Video: Web Push Notifications](https://www.youtube.com/watch?v=_dXBibRO0SM&ab_channel=GoogleChromeDevelopers) — Google I/O 2016
+		* [Bringing Push Notifications to the Mobile Web](https://www.youtube.com/watch?v=HbmcnjWFGbY&ab_channel=@Scale) — @scale
+		* [Deep Engagment with Push Notifications](https://www.youtube.com/watch?v=Zq-tRtBN3ws&ab_channel=GoogleChromeDevelopers) — Progressive Web App Summit 2016
+	* Installation on mobile home screen
+		* [Add to homescreen](https://developer.chrome.com/multidevice/android/installtohomescreen) — Android
+		* [Web App Install Banners](https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/?hl=en) — Chrome for Android
+		* [Increasing Engagement with Web App Install Banners](https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android) — Chrome for Android
+		* [Configuring Web Applications](https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html) — iOS
+		* [Web manifest specification](http://html5doctor.com/web-manifest-specification/) — HTML5 Doctor
+* Peformance
+	* General Readings
+		* [High Performance Browser Networking](https://hpbn.co/) — Ilya Grigorik, O’Reilly
+		* [Web Performance Warrior: The business of speed](http://www.oreilly.com/webops-perf/free/web-performance-warrior.csp) - Andy Still, O’Reilly
+	*  Performance Patterns
+		* [Introducing RAIL: A User-Centric Model For Performance](https://www.smashingmagazine.com/2015/10/rail-user-centric-model-performance/)
+		* [Serve your content](https://www.polymer-project.org/1.0/toolbox/server) (introduces the PRPL pattern)
+	* HTTP2
+		* [High Performance Browser Networking, chapter 12](https://hpbn.co/http2/) — Ilya Grigorik, O’Reilly
+		* [Are you ready for HTTP/2 Server Push?!](https://blogs.akamai.com/2016/04/are-you-ready-for-http2-server-push.html)  — Akhil Jayaprakash
+		* [Innovating with HTTP2 server push](https://www.igvita.com/2013/06/12/innovating-with-http-2.0-server-push/) — Ilya Grigorik
+	* Readings
+		* Performance: Showing Versus Telling — Lara Hogan
+		*  [An Introduction to perceived performance](http://blog.teamtreehouse.com/perceived-performance) — Matt West
+		* [Response Times: The 3 Important Limits](https://www.nngroup.com/articles/response-times-3-important-limits/) — Jakob Nielsen
+		* [Powers of 10: Time Scales in User Experience](https://www.nngroup.com/articles/powers-of-10-time-scales-in-ux/) — Jakob Nielsen
+		* [Response time in man-computer conversational transactions](http://theixdlibrary.com/pdf/Miller1968.pdf) — Robert Miller
+		* [The information visualizer: An information workspace](http://www2.parc.com/istl/groups/uir/publications/items/UIR-1991-01-Card-CHI91-IV.pdf) — Card, Robertson and Mackinlay
+		* [A Beginner's Guide to Perceived Performance: 4 Ways to Make Your Mobile Site Feel Like a Native App](http://dev.mobify.com/blog/beginners-guide-to-perceived-performance/) — Kyle Peatt
+		* [A Study on Tolerable Waiting Time: How long Are Web Users Willing to Wait?](http://sighci.org/uploads/published_papers/bit04/BIT_Nah.pdf)— Fiona Fui-Hoon Nah
+		* [Interaction in 4-Second Bursts: The Fragmented Nature of Attentional Resources in Mobile HCI](http://www.interruptions.net/literature/Oulasvirta-CHI05-p919-oulasvirta.pdf)— Antti Oulasvirta, Sakari Tamminen, Virpi Roto, and Jaana Kuorelaht
+		* [Quantifying Interactive User Experience on Thin Clients](http://isr.cmu.edu/doc/tolia06-ieee.pdf)— Niraj Tolia, David G. Andersen, and M. Satyanarayanan
+		* [Characterizing Web Use on Smartphones](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.366.1170&amp;rep=rep1&amp;type=pdf)— Chad C. Tossell, Philip Kortum, Ahmad Rahmati, Clayton Shepard, Lin Zhong
+		* [Playing With Tactile Feedback Latency in Touchscreen Interaction: Two Approaches](http://link.springer.com/chapter/10.1007%2F978-3-642-23771-3_42)— Topi Kaaresoja, Eve Hoggan, Emilia Anttila
 
