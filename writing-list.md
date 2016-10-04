@@ -19,7 +19,8 @@ Written in order of interest and importance. The order inside each category does
 	* [Reducing Cognitive Overload For A Better User Experience](https://www.smashingmagazine.com/2016/09/reducing-cognitive-overload-for-a-better-user-experience/)
 	* [Bloom’s Taxonomy](http://www.nwlink.com/~donclark/hrd/bloom.html) (back to my Instructional design days)
 	* [http://www.personal.psu.edu/bxb11/Objectives/GoalsAndObjectives\_print.html](http://www.personal.psu.edu/bxb11/Objectives/GoalsAndObjectives_print.html)
-	* [Cognitive Load Theory, Learning Difficulty, and Instructional Design](https://www.smashingmagazine.com/2016/09/reducing-cognitive-overload-for-a-better-user-experience/) — John Sweller (PDF)
+	* [Cognitive Load Theory, Learning Difficulty, and Instructional Design](https://www.smashingmagazine.com/2016/09/reducing-cognitive-overload-for-a-better-user-experience/) —- John Sweller (PDF)
+	* [Minimize Cognitive Load to Maximize Usability](https://www.nngroup.com/articles/minimize-cognitive-load/) -- Kathryn Whitenton, Nielsen Norman Group
 * Front end web
 	1. A more conceptual piece to follow up on [What kind of web do we want](https://publishing-project.rivendellweb.net/what-kind-of-web-do-we-want/) and expands on some of the points I tried to make there.
 	2. Are we spoiled for choice? There’s so many choices at all levels of the development stack (both back and front end) that it’s scary for someone coming in to the field. I’ll present my own opinionated choices and sample scripts using them.
