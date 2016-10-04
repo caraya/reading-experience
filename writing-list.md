@@ -1,5 +1,6 @@
 # Writing Lists
 
+Written in order of interest and importance. The order inside each category doesn't really matter. 
 
 * Progressive subcompact publications
 	1.  Do all paradigms for copy protection and owner rights apply to an open web publication?
@@ -23,8 +24,13 @@
 	1. A more conceptual piece to follow up on [What kind of web do we want](https://publishing-project.rivendellweb.net/what-kind-of-web-do-we-want/) and expands on some of the points I tried to make there.
 	2. Are we spoiled for choice? There’s so many choices at all levels of the development stack (both back and front end) that it’s scary for someone coming in to the field. I’ll present my own opinionated choices and sample scripts using them.
 	 3. Create a set of paged media CSS to match layouts in Kinfolk and Wired
+* Accessibility
+	1. I got dinged on accessibility big time. More research, experimentation and development, particularly in my Polymer apps
+	2. Building accessibility into your development workflow
+		* Gulp tools and workflows
 * Polymer
-	1. Research Polymer 2.0, changes and upgrades for existing components and how to create new ones. 
+	1. Research Polymer 2.0, changes and upgrades for existing components and how to create new ones
+		* Get as much information as you can from the Polymer Summit in London
 		* Is it worth upgrading or do we need to recreate existing elements
 	2. Polymer based theme for WordPress blog
 	3. Get back to my book proposal on web components. Run it by reviewers and see if Pragmatic will accept it or not
@@ -33,7 +39,3 @@
 		* Is the editor ready for Polymer 2.0?
 		* Is the editor ready for primetime? It doesn’t seem to be a high priority for people working on development
 		* Since the client is written using Atom Shell, can we do the same thing for the resulting content?
-* Accessibility
-	1. I got dinged on accessibility big time. More research, experimentation and development, particularly in my Polymer apps
-	2. Building accessibility into your development workflow
-		* Gulp tools and workflows
