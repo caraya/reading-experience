@@ -91,65 +91,67 @@ This is a fairly common pattern to build a service worker that will perform the 
 * Automatically cleans up old cached content when the service worker is updated
 * Fetches app resources using a ‘cache first strategy’. If the content requested is in the cache then serve it from there. If it’s not on the cache then make a network request for the resource, serve it to the user and put it in the cache for later requests
 
-	var CACHE_NAME = 'my-site-cache-v1';
-	var cacheWhitelist = [CACHE_NAME];
-	var urlsToCache = [
-	  '/',
-	  '/styles/main.css',
-	  '/script/main.js',
-	  'images/banner.png'
-	];
+```javascript
+var CACHE_NAME = 'my-site-cache-v1';
+var cacheWhitelist = [CACHE_NAME];
+var urlsToCache = [
+	'/',
+	'/styles/main.css',
+	'/script/main.js',
+	'images/banner.png'
+];
+
+self.addEventListener('install', function(event) {
+	event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
 	
-	self.addEventListener('install', function(event) {
-	  event.waitUntil(
-	    caches.open(CACHE_NAME)
-	      .then(function(cache) {
-	        console.log('Opened cache');
-	        return cache.addAll(urlsToCache);
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
 	      })
-	  );
-	});
+	   	);
+	  })
+	);
+});
 	
-	self.addEventListener('activate', function(event) {
-	  event.waitUntil(
-	    caches.keys().then(function(cacheNames) {
-	      return Promise.all(
-	        cacheNames.map(function(cacheName) {
-	          if (cacheWhitelist.indexOf(cacheName) === -1) {
-	            return caches.delete(cacheName);
-	          }
-	        })
-	      );
-	    })
-	  );
-	});
-	
-	self.addEventListener('fetch', function(event) {
-	  event.respondWith(
-	    caches.match(event.request)
-	      .then(function(response) {
-	        if (response) {
-	          return response;
-	        }
-	        return fetch(event.request)
-	          .then(function(response) {
-	            // Check if we received a valid response
-	            if (!(response)) {
-	              throw Error('unable to retrieve file');
-	            }
-	            var responseToCache = response.clone();
-	            caches.open(CACHE_NAME)
-	              .then(function (cache) {
-	                cache.put(event.request, responseToCache);
-	              });
-	            return response;
-	          })
-	          .catch(function(error) {
-	            console.log('[Service Worker] unable to complete the request: ', error);
-	          });
-	      })
-	  );
-	});
+self.addEventListener('fetch', function(event) {
+	event.respondWith(
+		caches.match(event.request)
+			.then(function(response) {
+				if (response) {
+					return response;
+				}
+				return fetch(event.request)
+					.then(function(response) {
+						// Check if we received a valid response
+						if (!(response)) {
+							throw Error('unable to retrieve file');
+						}
+						var responseToCache = response.clone();
+						caches.open(CACHE_NAME)
+							.then(function (cache) {
+								cache.put(event.request, responseToCache);
+							});
+						return response;
+					})
+					.catch(function(error) {
+						console.log('[Service Worker] unable to complete the request: ', error);
+					});
+			})
+	);
+});
+```
 
 There are things that we are not covering on purpose for the sake of keeping the code short. Some of these things include:
 
