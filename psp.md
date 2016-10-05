@@ -485,8 +485,8 @@ Improving performance is a never ending game. Ilya Grigorik illustrates this poi
 		* [Are you ready for HTTP/2 Server Push?!](https://blogs.akamai.com/2016/04/are-you-ready-for-http2-server-push.html)  — Akhil Jayaprakash
 		* [Innovating with HTTP2 server push](https://www.igvita.com/2013/06/12/innovating-with-http-2.0-server-push/) — Ilya Grigorik
 	* Readings
-		* Performance: Showing Versus Telling — Lara Hogan
-		*  [An Introduction to perceived performance](http://blog.teamtreehouse.com/perceived-performance) — Matt West
+		* [Performance: Showing Versus Telling](http://alistapart.com/article/performance-showing-versus-telling) — Lara Hogan
+		* [An Introduction to perceived performance](http://blog.teamtreehouse.com/perceived-performance) — Matt West
 		* [Response Times: The 3 Important Limits](https://www.nngroup.com/articles/response-times-3-important-limits/) — Jakob Nielsen
 		* [Powers of 10: Time Scales in User Experience](https://www.nngroup.com/articles/powers-of-10-time-scales-in-ux/) — Jakob Nielsen
 		* [Response time in man-computer conversational transactions](http://theixdlibrary.com/pdf/Miller1968.pdf) — Robert Miller
