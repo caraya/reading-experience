@@ -27,6 +27,8 @@ Written in order of interest and importance. The order inside each category does
 			* [Customized builtin example](https://www.w3.org/TR/custom-elements/#custom-elements-customized-builtin-example)
 			* [Drawbacks of autonomous custom elements](https://www.w3.org/TR/custom-elements/#custom-elements-autonomous-drawbacks)
 		6. [Shadow DOM Specification](https://www.w3.org/TR/shadow-dom/) **Note that this specification has part that are being upstreamed to other specs (DOM and HTML). As such its usefulness as a research and learning tool is limited**
+			* [Shadow DOM examples for v0 and v1](http://hayato.io/2016/shadowdomv1/)
+			* [WebKit announcement on Slot-based ShadowDOM](https://webkit.org/blog/4096/introducing-shadow-dom-api/)
 * Cognitive objectives and cognitive loads
 	* [Reducing Cognitive Overload For A Better User Experience](https://www.smashingmagazine.com/2016/09/reducing-cognitive-overload-for-a-better-user-experience/)
 	* [Bloom’s Taxonomy](http://www.nwlink.com/~donclark/hrd/bloom.html) (back to my Instructional design days)
