@@ -10,11 +10,23 @@ Written in order of interest and importance. The order inside each category does
 <strike>
 3.  Long form publishing using concepts of progressive web applications: An exploration of how far we can push the web as a publishing medium.
   *  What can we do beyond offline?
-    *  Is it possible to have a fully offline reading experience after first download?
-		* How have reader expectations changed?
-		* How do existing and upcoming technologies benefit online publishing?
+  *  Is it possible to have a fully offline reading experience after first download?
+  * How have reader expectations changed?
+	* How do existing and upcoming technologies benefit online publishing?
 </strike>
 
+* ES6 Classes, how they work and how we extend them
+	* Prerequisite for any work in Polymer 2.0
+	* Links and resources
+		1. [Custom Elements v1: Reusable Web Components](https://developers.google.com/web/fundamentals/getting-started/primers/customelements?hl=en)
+		2. [Shadow DOM v1: Self-Contained Web Components](https://developers.google.com/web/fundamentals/getting-started/primers/shadowdom)
+		3. [<card-swiper> custom element](https://gist.github.com/ebidel/36fb1bd8cc53c89243ed1e53f2da2eaa)
+		4. [Fancy tabs web component - shadow dom v1, custom elements v1, full a11y](https://gist.github.com/ebidel/2d2bb0cdec3f2a16cf519dbaa791ce1b)
+		5. [Custom Elements Specification](https://www.w3.org/TR/custom-elements/)
+			* [Autonomous example](https://www.w3.org/TR/custom-elements/#custom-elements-autonomous-example)
+			* [Customized builtin example](https://www.w3.org/TR/custom-elements/#custom-elements-customized-builtin-example)
+			* [Drawbacks of autonomous custom elements](https://www.w3.org/TR/custom-elements/#custom-elements-autonomous-drawbacks)
+		6. [Shadow DOM Specification](https://www.w3.org/TR/shadow-dom/) **Note that this specification has part that are being upstreamed to other specs (DOM and HTML). As such its usefulness as a research and learning tool is limited**
 * Cognitive objectives and cognitive loads
 	* [Reducing Cognitive Overload For A Better User Experience](https://www.smashingmagazine.com/2016/09/reducing-cognitive-overload-for-a-better-user-experience/)
 	* [Bloom’s Taxonomy](http://www.nwlink.com/~donclark/hrd/bloom.html) (back to my Instructional design days)
