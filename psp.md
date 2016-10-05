@@ -166,6 +166,7 @@ But at 60 lines of Javascript that will work in 3 of the 5 major browsers (and s
 
 Assuming that we saved the service worker as `sw.js` we can write the code below inside a script tag on our entry page (`index.html`).
 
+```javascript
 	if ('serviceWorker' in navigator) {
 	 console.log('Service Worker is supported');
 	 navigator.serviceWorker.register('sw.js').then(function(reg) {
@@ -174,6 +175,7 @@ Assuming that we saved the service worker as `sw.js` we can write the code below
 	   console.log('boo!', err);
 	 });
 	}
+```
 
 This script checks for service worker support by testing if the string `serviceWorker` exists in the navigator object. If it does then service workers are supported, we log a message to the console and then register the serviceworker.
 
@@ -190,32 +192,35 @@ It will also take care of importing additional scripts to use sw-toolbox (descri
 
 A gulpfile.js using sw-precache looks like this:
 
-	// Assigning modules to local constants
-	var gulp = require('gulp');
-	// Required for sw-precache
-	var path = require('path');
-	var swPrecache = require('sw-precache');
-	// Array of paths. Currently only uses the src to represent the path to source
-	var paths = {
-	  src: './'
-	};
-	
-	gulp.task('service-worker', function(callback) {
-	  swPrecache.write(path.join(paths.src, 'service-worker.js'), {
-	    staticFileGlobs: [
-	      paths.src + 'index.html',
-	      paths.src + 'js/main.js',
-	      paths.src + 'css/main.css',
-	      paths.src + 'images/**/*'
-	
-	    ],
-	    importScripts: [
-	      'node_modules/sw-toolbox/sw-toolbox.js',
-	      paths.src + 'js/toolbox-scripts.js'
-	    ],
-	    stripPrefix: paths.src
-	  }, callback);
-	});
+```javascript
+// Assigning modules to local constants
+var gulp = require('gulp');
+// Required for sw-precache
+var path = require('path');
+var swPrecache = require('sw-precache');
+// Array of paths. Currently only uses the src to represent the path to source
+var paths = {
+	src: './'
+};
+
+gulp.task('service-worker', function(callback) {
+	swPrecache.write(path.join(paths.src, 'service-worker.js'), {
+		staticFileGlobs: [
+			paths.src + 'index.html',
+			paths.src + 'js/main.js',
+			paths.src + 'css/main.css',
+			paths.src + 'images/**/*'
+
+		],
+		importScripts: [
+			'node_modules/sw-toolbox/sw-toolbox.js',
+			paths.src + 'js/toolbox-scripts.js'
+		],
+		stripPrefix: paths.src
+	}, callback);
+});
+```
+
 [sw-toolbox](https://googlechrome.github.io/sw-toolbox/docs/master/tutorial-usage) automates dynamic caching for your service worker. It creates customizable routes for your caching and provides for express-like or regular-expression-based routes to match routes and resources. 
 
 In the gulpfile.js abov the `importScripts` section imports two files:
@@ -233,56 +238,60 @@ There is an optional cache object that contains additional parameters for the ca
 
 The `toolbox-scripts.js` looks like this:
 
-	(function(global) {
-	  'use strict';
-	
-	  // The route for any requests from the googleapis origin
-	  global.toolbox.router.get('/(.*)', global.toolbox.cacheFirst, {
-	    cache: {
-	      name: 'googleapis',
-	      maxEntries: 20,
-	    },
-	    origin: /\.googleapis\.com$/
-	  });
-	
-	// We want no more than 50 images in the cache. 
-	// We use a cache first strategy
-	  global.toolbox.router.get(/\.(?:png|gif|jpg)$/, global.toolbox.cacheFirst, {
-	    cache: {
-	      name: 'images-cache',
-	      maxEntries: 50
-	    }
-	  });
-	
-	  // pull html content using network first
-	  global.addEventListner('fetch', function(event) {
-	    if (event.request.headers.get('accept').includes('text/html')) {
-	      event.respondWith(toolbox.networkFirst(event.request));
-	    }
-	    // you can add additional synchronous checks 
-	    // based on event.request.
-	  });
-	
-	  // pull video using network only. 
-	  // We don't want such large files in the cache
-	  global.toolbox.router.get('(.+)', global.toolbox.networkOnly, {
-	    origin: /\.(?:youtube|vimeo)\.com$/
-	  });
-	
-	  // the default route is global and uses cacheFirst
-	  global.toolbox.router.get('/*', global.toolbox.cacheFirst);
-	})(self);
+```javascript
+(function(global) {
+	'use strict';
+
+	// The route for any requests from the googleapis origin
+	global.toolbox.router.get('/(.*)', global.toolbox.cacheFirst, {
+		cache: {
+			name: 'googleapis',
+			maxEntries: 20,
+		},
+		origin: /\.googleapis\.com$/
+	});
+
+// We want no more than 50 images in the cache. 
+// We use a cache first strategy
+	global.toolbox.router.get(/\.(?:png|gif|jpg)$/, global.toolbox.cacheFirst, {
+		cache: {
+			name: 'images-cache',
+			maxEntries: 50
+		}
+	});
+
+	// pull html content using network first
+	global.addEventListner('fetch', function(event) {
+		if (event.request.headers.get('accept').includes('text/html')) {
+			event.respondWith(toolbox.networkFirst(event.request));
+		}
+		// you can add additional synchronous checks 
+		// based on event.request.
+	});
+
+	// pull video using network only. 
+	// We don't want such large files in the cache
+	global.toolbox.router.get('(.+)', global.toolbox.networkOnly, {
+		origin: /\.(?:youtube|vimeo)\.com$/
+	});
+
+	// the default route is global and uses cacheFirst
+	global.toolbox.router.get('/*', global.toolbox.cacheFirst);
+})(self);
+```
 
 Registering the automatically generated service worker is no different than registering the manually generated script. Assuming that we saved the service worker as `service-worker.js`the registration code in our entry page (`index.html`) looks like this:
 
-	if ('serviceWorker' in navigator) {
-	 console.log('Service Worker is supported');
-	 navigator.serviceWorker.register('sw.js').then(reg => {
-	   console.log('Yay!', reg);
-	 }).catch(err => {
-	   console.log('boo!', err);
-	 });
-	}
+```javascript
+if ('serviceWorker' in navigator) {
+ console.log('Service Worker is supported');
+ navigator.serviceWorker.register('sw.js').then(reg => {
+	 console.log('Yay!', reg);
+ }).catch(err => {
+	 console.log('boo!', err);
+ });
+}
+```
 
 ## What can we do beyond offline?
 
