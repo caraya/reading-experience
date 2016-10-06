@@ -322,7 +322,7 @@ If you write an email, instant message, or simply favourite a tweet, the applica
 
 Unfortunately, on the web, that outbox can only be processed while the site is displayed in a browsing context. This is particularly problematic on mobile, where browsing contexts are frequently shut down to free memory.
 
-This API provides a web equivalent to native application platforms’ [job scheduling APIs](https://developer.android.com/reference/android/app/job/JobScheduler.html) that enable developers to collaborate with the system to ensure low power usage and background-driven processing. The web platform needs capabilities like this too.
+This API provides a web equivalent to native application platforms’ [job scheduling APIs](https://developer.android.com/reference/android/app/job/JobScheduler.html) that enable developers to collaborate with the system to ensure low power usage and background-driven processing. The web platform needs capabilities like this too. In the future we'll be able to do periodic synchronizations. 
 
 A more detailed explanation can be found in the [explainer document for background sync](https://github.com/WICG/BackgroundSync/blob/master/explainer.md).
 
@@ -407,7 +407,7 @@ We have gotten lazy or, possibly, made the wrong assumptions. The graphic below,
 
 ![](https://www.soasta.com/wp-content/uploads/2015/06/page-bloat-May15-page-composition.png)
 
-For a more complete perspective checkout Udacity’s [Website Performance Optimization](https://www.udacity.com/course/website-performance-optimization--ud884)optimization course. 
+For a more complete perspective checkout Udacity’s [Website Performance Optimization](https://www.udacity.com/course/website-performance-optimization--ud884) course. 
 
 ### How are you serving your content?
 
