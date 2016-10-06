@@ -368,7 +368,7 @@ I collect electronic versions of GQ, Wired, Vanity Fair, Fast Company and Harvar
 
 <div class="video">
 <iframe src="https://player.vimeo.com/video/112865159?color=9c191e" width="560" height="315" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-<div>
+</div>
 
 After watching this presentation from Beyond Tellerand I couldn’t help reading the new edition of [Hardboiled Web Design](https://shop.smashingmagazine.com/products/hardboiled-web-design). Clarke advocates that creativity should be at the center of our online design work... It speaks to the need of art directed web design and bespoke designs rather than using the same design over and over. 
 
