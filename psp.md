@@ -1,11 +1,16 @@
 # Long form publishing with progressive subcompact applications
 
-For the past few months I’ve been working at Google building a set of instructor-led courses on how to build progressive web applications. This has made me think of how to push some of these concepts into what I call “Progressive subcompact publications”.  These concepts are different than ePub Next and any number of formats vining for use, each of wich have issues that are hard to overcome:
-* They seek to replace the installed EPUB (and Kindle) user base.  Since most users of iBooks and Kindles are locked in to their devices and readers this is not a good idea
-* There will never be uniform buy in to new specs or ways to publish content and, unless you can get a majority of publishers to implement your specification, schema or idea you will be competing with a behemoth that is very slow to evolve (not questioning the reasons, just making a statement)
-* Some people are trying to establish their format as a defacto standard (use this instead of what you already have) and that’s dangerous. 
-	* It’s dangerous if you fail to get full buy in because it segments the market even further
-	* it’s dangerous if you succeed because the defacto standard becomes a dejure standard and you have to support it and work all the warts that were ok when you were developing it (check the Javascript specifications for the amount of baggage carried over to keep old code from breaking)
+For the past few months I’ve been working at Google building a set of instructor-led courses on how to build progressive web applications. This has made me think of how to push some of these concepts into what I call “Progressive subcompact publications”.  These concepts are different than ePub Next and any number of formats vining for use, each of which have issues that are hard to overcome:
+
+<ul>
+    <li>They seek to replace the installed EPUB (and Kindle) user base.  Since most users of iBooks and Kindles are locked in to their devices and readers this is not a good idea</li>
+    <li>There will never be uniform buy in to new specs or ways to publish content and, unless you can get a majority of publishers to implement your specification, schema or idea you will be competing with a behemoth that is very slow to evolve (not questioning the reasons, just making a statement)</li>
+    <li>Some people are trying to establish their format as a defacto standard (use this instead of what you already have) and that’s dangerous</li>
+    <ul>
+        <li>It’s dangerous if you fail to get full buy in because it segments the market even further</li>
+        <li>it’s dangerous if you succeed because the defacto standard becomes a dejure standard and you have to support it and work all the warts that were ok when you were developing it (check the Javascript specifications for the amount of baggage carried over to keep old code from breaking)</li>
+    </ul>
+</ul>
 
 Instead I’m looking at progressive web applications as a starting point for an exploration of how far we can push the web as a publishing medium.
 
@@ -30,6 +35,7 @@ These technologies also don’t stop you from using the new, shinny and awesome 
 We will also briefly explore what it would take to make PSPs into full desktop and mobile applications using Electron and Apache Cordoba / Adobe PhoneGap. Again this is not meant to be a perfect solution but an exploration of possibilities. 
 
 ## What is subcompact publishing
+
 > It seems that perfection is attained, not when there is nothing more to add, but when there is nothing more to take away.
 > Antoine de Saint Exupéry
 
@@ -126,30 +132,33 @@ self.addEventListener('activate', function(event) {
 });
 	
 self.addEventListener('fetch', function(event) {
-	event.respondWith(
-		caches.match(event.request)
-			.then(function(response) {
-				if (response) {
-					return response;
-				}
-				return fetch(event.request)
-					.then(function(response) {
-						// Check if we received a valid response
-						if (!(response)) {
-							throw Error('unable to retrieve file');
-						}
-						var responseToCache = response.clone();
-						caches.open(CACHE_NAME)
-							.then(function (cache) {
-								cache.put(event.request, responseToCache);
-							});
-						return response;
-					})
-					.catch(function(error) {
-						console.log('[Service Worker] unable to complete the request: ', error);
-					});
-			})
-	);
+  event.respondWith(
+  caches.match(event.request)
+  .then(function(response) {
+    if (response) {
+      return response;
+    }
+    
+    return fetch(event.request)
+      .then(function(response) {
+        // Check if we received a valid response
+        if (!(response)) {
+          throw Error('unable to retrieve file');
+        }
+
+      var responseToCache = response.clone();
+      caches.open(CACHE_NAME)
+        .then(function (cache) {
+            cache.put(event.request, responseToCache);
+          });
+        return response;
+      })
+      
+      .catch(function(error) {
+        console.log('[Service Worker] unable to complete the request: ', error);
+      });
+    })
+  );
 });
 ```
 
@@ -167,14 +176,14 @@ But at 60 lines of Javascript that will work in 3 of the 5 major browsers (and s
 Assuming that we saved the service worker as `sw.js` we can write the code below inside a script tag on our entry page (`index.html`).
 
 ```javascript
-	if ('serviceWorker' in navigator) {
-	 console.log('Service Worker is supported');
-	 navigator.serviceWorker.register('sw.js').then(function(reg) {
-	   console.log('Yay!', reg);
-	 }).catch(function(err) {
-	   console.log('boo!', err);
-	 });
-	}
+if ('serviceWorker' in navigator) {
+  console.log('Service Worker is supported');
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    console.log('Yay!', reg);
+  }).catch(function(err) {
+    console.log('boo!', err);
+  });
+}
 ```
 
 This script checks for service worker support by testing if the string `serviceWorker` exists in the navigator object. If it does then service workers are supported, we log a message to the console and then register the serviceworker.
@@ -184,6 +193,7 @@ If the serviceWorker string doesn’t exist in the navigator object then service
 That’s it. The combination of those two scripts gives us consistent performance across devices and the possibility of work offline after accessing the content once while online. 
 
 ## Service Worker: Next step
+
 Doing it by hand is fun and teaches you a lot about the inner workings of service workers but having to update the files you want to cache and how to define the routes you want to use to cache your content. 
 
 [sw-precache](https://github.com/GoogleChrome/sw-precache/blob/master/GettingStarted.md) is a Google tool developed to atuomate creation of service workers with application shell caching on installation. The tool can be used from command line or as part of a build system (Grunt, Gulp and others). 
@@ -204,20 +214,20 @@ var paths = {
 };
 
 gulp.task('service-worker', function(callback) {
-	swPrecache.write(path.join(paths.src, 'service-worker.js'), {
-		staticFileGlobs: [
-			paths.src + 'index.html',
-			paths.src + 'js/main.js',
-			paths.src + 'css/main.css',
-			paths.src + 'images/**/*'
-
-		],
-		importScripts: [
-			'node_modules/sw-toolbox/sw-toolbox.js',
-			paths.src + 'js/toolbox-scripts.js'
-		],
-		stripPrefix: paths.src
-	}, callback);
+  swPrecache.write(path.join(paths.src, 'service-worker.js'), {
+  staticFileGlobs: [
+    paths.src + 'index.html',
+    paths.src + 'js/main.js',
+    paths.src + 'css/main.css',
+    paths.src + 'images/**/*'
+    
+    ],
+    importScripts: [
+      'node_modules/sw-toolbox/sw-toolbox.js',
+      paths.src + 'js/toolbox-scripts.js'
+    ],
+    stripPrefix: paths.src
+  }, callback);
 });
 ```
 
@@ -254,25 +264,24 @@ The `toolbox-scripts.js` looks like this:
 // We want no more than 50 images in the cache. 
 // We use a cache first strategy
 	global.toolbox.router.get(/\.(?:png|gif|jpg)$/, global.toolbox.cacheFirst, {
-		cache: {
-			name: 'images-cache',
-			maxEntries: 50
-		}
+	  cache: {
+	    name: 'images-cache',
+	    maxEntries: 50
+	  }
 	});
 
 	// pull html content using network first
 	global.addEventListner('fetch', function(event) {
-		if (event.request.headers.get('accept').includes('text/html')) {
-			event.respondWith(toolbox.networkFirst(event.request));
-		}
-		// you can add additional synchronous checks 
-		// based on event.request.
+	  if (event.request.headers.get('accept').includes('text/html')) {
+	    event.respondWith(toolbox.networkFirst(event.request));
+	  }
+	
+	  // you can add additional synchronous checks based on event.request.
 	});
 
-	// pull video using network only. 
-	// We don't want such large files in the cache
+	// pull video using network only. We don't want such large files in the cache
 	global.toolbox.router.get('(.+)', global.toolbox.networkOnly, {
-		origin: /\.(?:youtube|vimeo)\.com$/
+	  origin: /\.(?:youtube|vimeo)\.com$/
 	});
 
 	// the default route is global and uses cacheFirst
@@ -285,10 +294,10 @@ Registering the automatically generated service worker is no different than regi
 ```javascript
 if ('serviceWorker' in navigator) {
  console.log('Service Worker is supported');
- navigator.serviceWorker.register('sw.js').then(reg => {
-	 console.log('Yay!', reg);
- }).catch(err => {
-	 console.log('boo!', err);
+ navigator.serviceWorker.register('sw.js').then(function(reg) {
+   console.log('Yay!', reg);
+ }).catch(function(err) {
+   console.log('boo!', err);
  });
 }
 ```
@@ -303,6 +312,10 @@ The service worker script we discussed in the prior section is the core of a PSP
 While not directly related to service workers this feature may help get better re-engagement from your users:
 
 * Installation on mobile homescreens
+
+Also not directly related to progressive web applications, we can also preserve data, not just content on our web applications using
+
+* IndexedDB
 
 We’ll discuss them in the sections below.
 
@@ -326,11 +339,99 @@ This API provides a web equivalent to native application platforms’ [job sched
 
 A more detailed explanation can be found in the [explainer document for background sync](https://github.com/WICG/BackgroundSync/blob/master/explainer.md).
 
-### Install in mobile homescreens
+### Install in mobile home screens
 
 Using the [W3C App Manifest specification](https://www.w3.org/TR/appmanifest/) and the existing metatags for adding an app to the homescreen in mobile devices we enable our users to add our web content to the homescreen of mobile devices to foster a higher level of interaction and reengagement with the content.  
 
 [HTML5 Doctor](http://html5doctor.com/web-manifest-specification/) has a good an up to date reference on App Manifest. Another source of information is the Mozilla Developer Network article on [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest). 
+
+### IndexedDB
+
+We've had client-side storage solutions for a while now. Sessions Storage, WebSQL and IndexedDB. Until recently they had no uniform support among brosers and one (WebSQL) is no longer being developed because all the implementations relied on [SQLite](https://sqlite.org/) as the backend and this was considered to violate the "two interoperable implementations" requirements for W3C specs. 
+
+I've chosen IndexedDB as the engine to store data for my offline applications because, as complicated as the API is work with, there are wrapper libraries that make the work easier and will work across browsers, even Safari (which has a deserved reputation for shitty IndexDB implementations). 
+
+Knowing how much of a pain it can be to write bare IndexedDB code, I've picked [Dexie](http://dexie.org/) as my wrapper library. It is easy to use and, for browsers who have issues with indexedDB like Safari, provide a transparent fallback to WebSQL.  It also uses promises rather than callbacks and, once you start working with promises, you will never go back to callbacks :-)
+
+The example below shows how to create a database and a store for the a theoretical friends datastore.
+ 
+```javascript
+var db = new Dexie("friends");
+
+// Define a schema
+db.version(1).stores({
+  friends: 'name, age'
+});
+```
+
+We then open the database
+
+```javascript
+// Open the database
+db.open().catch(function(error) {
+  alert('Uh oh : ', error);
+});
+```
+
+We can then insert records into the datastore one at a time or using a transaction. 
+
+Transactions group one or more actions into an atomic unit. If any of the actions composing a transaction fails then the entire transaction fails and the datasore is rolled back to the state before the transaction began.
+
+```javascript
+// Insert data into the database
+db.friends.add({
+  name: 'Camilla', age: 25
+});
+
+// Insert data into database using transactions
+function populateSomeData() {
+  return db.transaction("rw", db.friends, function () {
+    db.friends.clear();
+    db.friends.add({ name: "David", age: 48 });
+    db.friends.add({ name: "Ylva", age: 21 });
+    db.friends.add({ name: "Jon", age: 76 });
+    db.friends.add({ name: "Måns", age: 56 });
+    db.friends.add({ name: "Daniel", age: 55 });
+    db.friends.add({ name: "Nils", age: 42 });
+    db.friends.add({ name: "Zlatan", age: 21 });
+        
+    // Log data from DB:
+    db.friends.orderBy('name').each(function (friend) {
+        log(JSON.stringify(friend));
+    });
+  })
+  .catch(function (e) {
+    log(e, "error");
+  });
+}
+ ```
+We can then retrieve data from the store usning queries similar to the SQL syntax. An example of this query retrieves all the names from the data store where the age is over (above) 35 and then display the names.  
+
+```javascript
+// Query friends datastore
+db.friends
+  .where('age')
+  .above(35)
+  .each (function (friend) {
+    console.log (friend.name);
+  });
+```
+
+There may be occasions when we need to delete the database, maybe because we don't need it again or maybe because we screwed up and want to start over.  
+
+```javascript
+db.delete().then(function() {
+    console.log("Database successfully deleted");
+}).catch(function (err) {
+    console.error("Could not delete database");
+}).finally(function() {
+    // Do what should be done next...
+});
+```
+
+This is a very broad and quick overview of Dexie. If you want more information check [the Dexie.js Tutorial](https://github.com/dfahlander/Dexie.js/wiki/Tutorial) to get started. 
+
+There are other wrapper libraries for IndexedDB
 
 ## Other fun things we can do
 
@@ -362,7 +463,7 @@ This is where the first set of choices happen: What layout do we choose? How do 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/kRYrbcGWjzU?rel=0" frameborder="0" allowfullscreen></iframe>
 </div>
 
-I first saw Jen’s presentation in SFHTML5. I see it as a challenge and an opportunity to think differently about the way we create and layout our content on the web.  For longer form content this also speaks to letting the content dictate the layout and not the other way around.  What is it that makes magazine layouts so interesting? 
+I first saw Jen’s presentation at SFHTML5. I see it as a challenge and an opportunity to think differently about the way we create and layout our content on the web.  For longer form content this also speaks to letting the content dictate the layout and not the other way around.  What is it that makes magazine layouts so interesting? 
 
 I collect electronic versions of GQ, Wired, Vanity Fair, Fast Company and Harvard Business Review and the biggest question when I read them is how can we make this reading experience in the open web? The ads from magazines are what intrigue me the most… and where a lot of my most radical ideas come from. 
 
@@ -396,7 +497,7 @@ We want to get to the site’s first meaningful paint on initial load in as clos
 
 Animations should take no more than 16 milliseconds in order to reach 60 frames a second.
 
-### Performance Optimizations
+## Performance Optimizations
 We can optimize our resources so that time to first meaningful interaction is as short as possible. First load will also cache the resources needed for our application shell and then dynamically .  We want to optimize this to last as little as possible.  
 
 This is not just speech for the sake of speach. Take the following graphic (from Soasta’s [Page bloat update: The average web page is more than 2 MB in size](https://www.soasta.com/blog/page-bloat-average-web-page-2-mb/)).  How can we minimize the number of resources to load and cache the first time we access a page? How many of these resources can be reused on pages accross the site? How can we optimize images to reduce their size?
@@ -409,9 +510,9 @@ We have gotten lazy or, possibly, made the wrong assumptions. The graphic below,
 
 For a more complete perspective checkout Udacity’s [Website Performance Optimization](https://www.udacity.com/course/website-performance-optimization--ud884) course. 
 
-### How are you serving your content?
+## How are you serving your content?
 
-PSPs do not avoid performance requirement…. however the questions are slightly different. Are you serving your content with HTTP 1.x or HTTP2? When I first heard the question asked I laughed… why should this matter?
+PSPs do not avoid performance requirements... however the questions are slightly different. Are you serving your content with HTTP 1.x or HTTP2? When I first heard the question asked I laughed… why should this matter?
 
 HTTP2 has changed the way we work with web content. What we used to consider as patterns and best practices are no longer necessay and may be considered anti patterns.  
 
@@ -420,7 +521,7 @@ Because of the way HTTP2 serves the content it is not necessary to concatenate o
 * is binary, instead of textual: Binary protocols are more efficient to parse, more compact “on the wire”, and most importantly, they are much less error-prone, compared to textual protocols like HTTP/1.x, because they often have a number of affordances to “help” with things like whitespace handling, capitalization, line endings, blank lines and so on
 * is fully multiplexed: Multiplexing addresses [head-of-line-blocking](https://www.wikiwand.com/en/Head-of-line_blocking) by allowing multiple request and response messages to be in flight at the same time; it’s even possible to intermingle parts of one message with another on the wire
 * can use one connection for parallelism: One application opening many connections simultaneously breaks a lot of the assumptions that TCP was built upon; since each connection will start a flood of data in the response, there’s a real risk that buffers in the intervening network will overflow, causing a congestion event and retransmits
-* uses header compression to reduce overhead:  If you assume that a page has about 80 assets and each request has 1400 bytes of headers, it takes at least 7-8 round trips to get the headers out “on the wire”. In comparison, even mild compression on headers allows those requests to get onto the wire within one roundtrip – perhaps even one packet.
+* uses header compression to reduce overhead:  If you assume that a page has about 80 assets and each request has 1400 bytes of headers, it takes at least 7-8 round trips to get the headers out “on the wire”. In comparison, even mild compression on headers allows those requests to get onto the wire within one round trip – perhaps even one packet.
 * allows servers to “push” responses proactively into client caches: When the server pushes the content that the client will need before it needs it we can save networks requests by caching the content in the browser (HTTP) cache 
 
 This doesn’t mean we shouldn’t minimize and compress resources but bundling them together is less important now that we don’t have to be concerned with saturating the connection to the server and can leverage HTTP2 push to let the server prefetch content to the client.  
@@ -431,7 +532,11 @@ Improving performance is a never ending game. Ilya Grigorik illustrates this poi
 <iframe width="560" height="315" src="https://www.youtube.com/embed/aqvz5Oqs238?rel=0" frameborder="0" allowfullscreen></iframe>
 </div>
 
-### Links, resources, patterns and ideas
+## A basic PSP Checklist
+
+
+
+## Links, resources, patterns and ideas
 * Responsive Web Design
 	* [Responsive Web Design](https://abookapart.com/products/responsive-web-design) — Ethan Marcotte, A Book Apart
 	* [Responsible Responsive Design](https://abookapart.com/products/responsible-responsive-design) — Scott Jehl, A Book Apart
